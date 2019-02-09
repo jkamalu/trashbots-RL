@@ -6,7 +6,7 @@ Implemented in Python 3.6 with dependencies listed in requirements.txt.
 
 1. `virtualenv -p python3.6 .env`
 
-2. `source .env/bin/activate
+2. `source .env/bin/activate`
 
 3. `pip install -r requirements.txt`
 
