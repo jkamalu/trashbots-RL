@@ -1,12 +1,9 @@
-import numpy as np
 import random
 import numpy as np
-from Agent import Agent
 
 import Motion
-import Agent
-import GaussianTrashSource
-
+from  GaussianTrashSource import GaussianTrashSource
+from Agent import Agent
 #####################################################
 # Environment (class)                               #
 # Models and administrates the environment / states #
@@ -19,9 +16,7 @@ REWARD_EAT_TRASH = 1
 REWARD_INVALID_MOVE = -1
 REWARD_NOTHING_HAPPEND = 0
 TRASH_APPEARENCE_PROB = 0.1
-
-
-EMPTY_TILE_ID = -1
+EMPTY_TILE_ID = -1 #Defines the value assigned to a tile in self.agent_grid if there is no agent on a field
 
 class Environment:
     """
@@ -72,26 +67,24 @@ class Environment:
         self.saved_timesteps = 3 # Number of timesteps saved for the neural network
         self.dim = dim # (y,x)
         # initialize trash grid
-        self.trash_grid_visible = np.zeros(shape = (self.dim[0], self.dim[1]), dtype = int)
-        self.trash_grid_complete = np.zeros(shape = (self.dim[0], self.dim[1]), dtype = int)
+        self.trash_grid_visible = np.zeros(shape=(self.dim[0], self.dim[1]), dtype=int)
+        self.trash_grid_complete = np.zeros(shape=(self.dim[0], self.dim[1]), dtype=int)
 
         # initialize robot grid
-        self.agent_grid = np.ones(shape = (self.dim[0], self.dim[1]), dtype = int) * EMPTY_TILE_ID
+        self.agent_grid = np.ones(shape=(self.dim[0], self.dim[1]), dtype=int) * EMPTY_TILE_ID
 
         # History is the list of grids seen over time, first element is the oldest one,
         # last element in the list is the newest one, for the initialisation they are filled
         # up with empty grids
         self.history_agent_grids = []
         self.history_visible_trash_grids = []
-        for n in range(0, self.saved_timesteps):
-            self.history_agent_grids.append(self.agent_grid)
-            self.history_visible_trash_grids.append(self.trash_grid_visible)
-        # Keep track of all agents
-        self.agents = []
-
         # Create some random trash sources
         self.trash_sources = []
-        for i in range(4):
+        # Keep track of all agents
+        self.agents = []
+        for timestep_counter in range(0, self.saved_timesteps):
+            self.history_agent_grids.append(self.agent_grid)
+            self.history_visible_trash_grids.append(self.trash_grid_visible)
             self.trash_sources.append(self.create_random_trash_source())
 
     # Getter Methods
@@ -180,7 +173,7 @@ class Environment:
 
         if exception_caught:
             return False
-        #TODO: when an agent is deleted this will lead to conflicts !!!
+        #TODO:  see Issue #4
         id = len(self.agents)
         # Add agent to list and grid
         self.agents.append(Agent(pos=coord, id=id, capacity=capacity))
@@ -202,7 +195,7 @@ class Environment:
         reward = 0
 
         if self.is_position_free_valid(new_pos) or not wants_to_move:
-            # TODO: What happens to the trash on an invalid move ? Currently probably doesn't take the trash
+            # TODO: See issue #5
             # Update the agents position
             my_agent.pos = new_pos
             self.agent_grid[old_pos] = EMPTY_TILE_ID
@@ -213,7 +206,7 @@ class Environment:
             if trash_eaten:
                 reward = REWARD_EAT_TRASH
         else:
-            # TODO: Clarify if Reward should be negative or zero for invalid move
+            # TODO: See issue #6
             # Invalid move
             reward = REWARD_INVALID_MOVE
 
