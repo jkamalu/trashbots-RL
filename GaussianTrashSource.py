@@ -2,7 +2,7 @@ from numpy.random import multivariate_normal
 
 class GaussianTrashSource:
 
-        def __init__(self, mean, cov=None, max_y, max_x, id=None ):
+        def __init__(self, mean, max_y, max_x, cov=None, id=None):
             """
             Creates a trashsource
 
@@ -32,24 +32,21 @@ class GaussianTrashSource:
             self.id = id
 
 
-        def draw_sample_in_limits():
+        def draw_sample_in_limits(self):
             """
 
             """
-            y,x = multivariate_normal(mean,cov,1)[0]
-            y = min(self.max_y,round(y))
-            x = min(self.max_x,round(x))
+            y, x = multivariate_normal(self.mean, self.cov,1)[0]
+            y = min(self.max_y, round(y))
+            x = min(self.max_x, round(x))
 
-            return [y,x]
+            return [y, x]
 
-        def get_trash():
+        def get_trash(self, n=None):
             """
-            Return the y,x
+            Returns a list of n coordinates drawn from the distribution
             """
-            return draw_sample_in_limits()
 
-        def get_trash(n):
-            """
-                Returns a list of n coordinates drawn from the distribution
-            """
-            return [get_trash() for i in range(n)]
+            if n:
+                return [self.draw_sample_in_limits() for i in range(n)]
+            return self.draw_sample_in_limits()

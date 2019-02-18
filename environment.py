@@ -1,6 +1,7 @@
 import random
 import Motion
 import numpy as np
+from random import randint
 
 #####################################################
 # Environment (class)                               #
@@ -9,13 +10,21 @@ import numpy as np
 #####################################################
 
 
+# Constants / Variables that will be used all throughout the code
+REWARD_EAT_TRASH = 1
+REWARD_INVALID_MOVE = -1
+REWARD_NOTHING_HAPPEND = 0
+TRASH_APPEARENCE_PROB = 0.1
+
 class Environment:
     """
     Variabels
     ----------
-    self.trash_grid : ndarray
-         Numpy array (dimension is chosen in init function) that stores where
-         trash is
+    self.trash_grid_complete : ndarray
+         Numpy array (dimension is chosen in init function) that stores where trash is
+
+    self.trash_grid_visible : ndarray
+         Numpy array (dimension is chosen in init function) that stores where currently trash AND agents are
 
     self.agent_grid : ndarray
         Numpy array (dimension is chosen in init function) that stores where
@@ -33,6 +42,8 @@ class Environment:
     self.dim : tuple
         Dimension of the Grids (trash and agent grid use this size)
 
+    self.trash_sources : list
+        List of Trashsources who can generate some trash each round.
     ----------
     """
 
@@ -69,6 +80,12 @@ class Environment:
         # Keep track of all agents
         self.agents = []
 
+        # Create some random trash sources
+        self.trash_sources = []
+        for i in range(4):
+            self.trash_sources.append(create_random_trash_source)
+
+
     # Getter Methods
     def get_agent_position(self, id):
         # agents id is equivalent to its index in the agents list
@@ -100,8 +117,10 @@ class Environment:
         # At coord no agent could appear / move to
         return False
 
-    def get_trash_grid():
-        return self.trash_grid
+
+
+    def get_complete_trash_grid(self):
+        return self.trash_grid_complete
 
     def get_agent_grid():
         return self.agent_grid
@@ -188,14 +207,41 @@ class Environment:
             update_visible_trash_grid(old_pos, new_pos)
             trash_eaten = let_agent_eat_trash(my_agent)
             if trash_eaten:
-                reward = 1
+                reward = REWARD_EAT_TRASH
         else:
             # Invalid move
-            reward = -1
+            reward = REWARD_INVALID_MOVE
 
         return reward
 
-    def update_visible_trash_grid(old_pos, new_pos):
+    def create_random_trash_source():
+        """
+        Creates a Trashsource with a random position on the grid.
+        The trash source is NOT automatically added somewhere!
+
+        Returns the Trashsource
+        """
+        mean_x = randint(0,self.dim[1])
+        mean_y = randint(0,self.dim[0])
+        mean = [mean_y,mean_x]
+        return GaussianTrashSource(mean=mean, max_y=self.dim[0], max_x=self.dim[1])
+
+
+    def generate_new_trash(self, alpha=None):
+        """
+        Each trashsource of the environment is, with probability alpha,
+        asked to generate a piece of trash that will then appear on the grid.
+        New trash will be added to the trash_grid_complete
+        """
+        if alpha == None:
+            alpha = TRASH_APPEARENCE_PROB
+
+        for source in self.trash_sources:
+            if random.random() < alpha:
+                trash_y,trash_x = source.get_trash()
+                self.trash_grid_complete[trash_y,trash_x] += 1
+
+    def update_visible_trash_grid(self, old_pos, new_pos):
         """
             Called when moving an agent from old_pos to new_pos
 
@@ -206,7 +252,7 @@ class Environment:
         trash_present = self.trash_grid[new_pos] > 0
         self.visible_trash_grid[new_pos] = trash_present
 
-    def let_agent_eat_trash(my_agent):
+    def let_agent_eat_trash(self, my_agent):
         """
             Lets my_agent try to eat some trash at his position.
             Checks for trash and updates trash_grid, visible_trash_grid and
@@ -244,7 +290,9 @@ class Environment:
             reward_list.append(self.move_agent(agent_idx, d_pos))
             agent_idx = agent_idx + 1
 
-        # save the current conditions (Stempeluhr) as next Timestep
+
+        generate_new_trash()
+        #Save the current conditions (Stempeluhr) as next Timestep
         self.save_condition_new_timestep()
         history_visible_trash, history_agents, current_pos_agent = self.export_known_data()
 
