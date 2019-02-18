@@ -1,7 +1,9 @@
-import random
-import Motion
 import numpy as np
-from random import randint
+import random
+
+import Motion
+import Agent
+import GaussianTrashSource
 
 #####################################################
 # Environment (class)                               #
@@ -15,6 +17,7 @@ REWARD_EAT_TRASH = 1
 REWARD_INVALID_MOVE = -1
 REWARD_NOTHING_HAPPEND = 0
 TRASH_APPEARENCE_PROB = 0.1
+
 
 class Environment:
     """
@@ -83,16 +86,15 @@ class Environment:
         # Create some random trash sources
         self.trash_sources = []
         for i in range(4):
-            self.trash_sources.append(create_random_trash_source)
-
+            self.trash_sources.append(self.create_random_trash_source())
 
     # Getter Methods
     def get_agent_position(self, id):
         # agents id is equivalent to its index in the agents list
-        return agents[id].pos
+        return self.agents[id].pos
 
     def get_agent(self, agent_idx):
-        return agents[agent_idx]
+        return self.agents[agent_idx]
 
     def is_position_free_valid(self, coord):
         """
@@ -111,18 +113,16 @@ class Environment:
             if the coordinates are valid and false if not
         """
 
-        if((0 <= coord[0] and coord[0] < self.dim[0])  and (0 <= coord[1] and coord[1] < self.dim[1]) and (self.agent_grid(coord) == 0)):
+        if((0 <= coord[0] and coord[0] < self.dim[0]) and (0 <= coord[1] and coord[1] < self.dim[1]) and (self.agent_grid(coord) == 0)):
             # Valid and free coordinate
             return True
         # At coord no agent could appear / move to
         return False
 
-
-
     def get_complete_trash_grid(self):
         return self.trash_grid_complete
 
-    def get_agent_grid():
+    def get_agent_grid(self):
         return self.agent_grid
 
     def get_rnd_free_position(self):
@@ -161,11 +161,10 @@ class Environment:
         -------
 
         """
-        succesfully_added = False
         exception_caught = False
         if coord is None:
             try:
-                coord = get_rnd_free_position()
+                coord = self.get_rnd_free_position()
             except Exception:
                 print("Handled exception")
                 exception_caught = True
@@ -183,7 +182,7 @@ class Environment:
         self.agent_grid[coord] = id
         return True
 
-    def move_agent(agent_idx, delta_coords):
+    def move_agent(self, agent_idx, delta_coords):
         """
         - Moves agent (if move is valid)
         - Eats trash if there is some on the new position.
@@ -197,15 +196,15 @@ class Environment:
         wants_to_move = (delta_coords[0] != 0) or (delta_coords[1] != 0)
         reward = 0
 
-        if is_position_free_valid(new_pos) or not wants_to_move:
+        if self.is_position_free_valid(new_pos) or not wants_to_move:
             # Update the agents position
             my_agent.pos = new_pos
             self.agent_grid[new_pos] = my_agent.id
             self.agent_grid[old_pos] = 0
 
             # Does the robot see trash on the new position?
-            update_visible_trash_grid(old_pos, new_pos)
-            trash_eaten = let_agent_eat_trash(my_agent)
+            self.update_visible_trash_grid(old_pos, new_pos)
+            trash_eaten = self.let_agent_eat_trash(my_agent)
             if trash_eaten:
                 reward = REWARD_EAT_TRASH
         else:
@@ -214,15 +213,15 @@ class Environment:
 
         return reward
 
-    def create_random_trash_source():
+    def create_random_trash_source(self):
         """
         Creates a Trashsource with a random position on the grid.
         The trash source is NOT automatically added somewhere!
 
         Returns the Trashsource
         """
-        mean_x = randint(0,self.dim[1])
-        mean_y = randint(0,self.dim[0])
+        mean_x = random.randint(0, self.dim[1])
+        mean_y = random.randint(0, self.dim[0])
         mean = [mean_y,mean_x]
         return GaussianTrashSource(mean=mean, max_y=self.dim[0], max_x=self.dim[1])
 
@@ -233,13 +232,13 @@ class Environment:
         asked to generate a piece of trash that will then appear on the grid.
         New trash will be added to the trash_grid_complete
         """
-        if alpha == None:
+        if alpha is None:
             alpha = TRASH_APPEARENCE_PROB
 
         for source in self.trash_sources:
             if random.random() < alpha:
-                trash_y,trash_x = source.get_trash()
-                self.trash_grid_complete[trash_y,trash_x] += 1
+                trash_y, trash_x = source.get_trash()
+                self.trash_grid_complete[trash_y, trash_x] += 1
 
     def update_visible_trash_grid(self, old_pos, new_pos):
         """
@@ -251,21 +250,6 @@ class Environment:
         self.visible_trash_grid[old_pos] = 0
         trash_present = self.trash_grid[new_pos] > 0
         self.visible_trash_grid[new_pos] = trash_present
-
-    def let_agent_eat_trash(self, my_agent):
-        """
-            Lets my_agent try to eat some trash at his position.
-            Checks for trash and updates trash_grid, visible_trash_grid and
-            my_agents attributes.
-        """
-        trash_eaten = False
-        if self.trash_grid[my_agent.pos] > 0:
-            self.trash_grid[new_pos] -= 1
-            my_agent.load += 1
-            my_agent.totally_collected += 1
-            trash_eaten = True
-
-        return trash_eaten
 
     def move_agents(self, action_list):
         """Updates the environment with the actions in the list.
@@ -290,9 +274,8 @@ class Environment:
             reward_list.append(self.move_agent(agent_idx, d_pos))
             agent_idx = agent_idx + 1
 
-
-        generate_new_trash()
-        #Save the current conditions (Stempeluhr) as next Timestep
+        self.generate_new_trash()
+        # Save the current conditions (Stempeluhr) as next Timestep
         self.save_condition_new_timestep()
         history_visible_trash, history_agents, current_pos_agent = self.export_known_data()
 
