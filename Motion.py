@@ -9,6 +9,6 @@ class Motion(MultiValueEnum):
 
     South = (1, 0), 2
 
-    West = (0, 1), 3
+    West = (0, -1), 3
 
-    Stay = (0, 0)
+    Stay = (0, 0), 4
