@@ -1,11 +1,14 @@
 import random
+import Motion
+import numpy as np
 from random import randint
 
-#######################################################
-## Environment (class)                               ##
-## Models and administrates the environment / states ##
-## and manages the time discrete updates             ##
-#######################################################
+#####################################################
+# Environment (class)                               #
+# Models and administrates the environment / states #
+# and manages the time discrete updates             #
+#####################################################
+
 
 # Constants / Variables that will be used all throughout the code
 REWARD_EAT_TRASH = 1
@@ -14,7 +17,7 @@ REWARD_NOTHING_HAPPEND = 0
 TRASH_APPEARENCE_PROB = 0.1
 
 class Environment:
-     """
+    """
     Variabels
     ----------
     self.trash_grid_complete : ndarray
@@ -24,7 +27,8 @@ class Environment:
          Numpy array (dimension is chosen in init function) that stores where currently trash AND agents are
 
     self.agent_grid : ndarray
-        Numpy array (dimension is chosen in init function) that stores where the different agents are
+        Numpy array (dimension is chosen in init function) that stores where
+        the different agents are
 
     self.agents : list
         Stores all the numbers of actual agents
@@ -44,20 +48,20 @@ class Environment:
     """
 
     def __init__(self, dim):
-    """Initial function for the environment.
+        """
+        Initial function for the environment.
 
-    Called to set up all basic things for the environment.
-    Parameters
-    ----------
-    dim : int tuple
-        Dimension of the field. Given as (y,x)
+        Called to set up all basic things for the environment.
+        Parameters
+        ----------
+        dim : int tuple
+            Dimension of the field.
 
-    Returns
-    -------
-
-    """
-        self.saved_timesteps = 3 # Number of timesteps saved for the neural network
-        self.dim = dim # (y,x)
+        Returns
+        -------
+        """
+        self.saved_timesteps = 3  # Number of timesteps saved for the neural network
+        self.dim = dim  # (y, x)
         # initialize trash grid
         self.trash_grid_visible = np.zeros(self.dim[0], self.dim[1])
         self.trash_grid_complete = np.zeros(self.dim[0], self.dim[1])
@@ -91,20 +95,20 @@ class Environment:
         return agents[agent_idx]
 
     def is_position_free_valid(self, coord):
-        """Checks if a field is free so that an agent can move/appear there.
-            a field is free and valid if it is inside the grid and there is
-            no robot on the field.
+        """
+        Checks if a field is free so that an agent can move/appear there.
+        a field is free and valid if it is inside the grid and there is
+        no robot on the field.
 
         ----------
         coord : int tuple / None
-            Coordinates where the new agent should appear (place in the grid has to
-            be free that the agent appears there) . And has to be valid
+            Coordinates where the new agent should appear (place in the grid
+            has to be free that the agent appears there) . And has to be valid
         return
         -------
         bool
-            Is True when the agent could appear on the passed coordinates and if the coordinates are valid
-            and false if not
-
+            Is True when the agent could appear on the passed coordinates and
+            if the coordinates are valid and false if not
         """
 
         if((0 <= coord[0] and coord[0] < self.dim[0])  and (0 <= coord[1] and coord[1] < self.dim[1]) and (self.agent_grid(coord) == 0)):
@@ -115,7 +119,7 @@ class Environment:
 
 
 
-    def get_complete_trash_grid():
+    def get_complete_trash_grid(self):
         return self.trash_grid_complete
 
     def get_agent_grid():
@@ -134,17 +138,15 @@ class Environment:
         """
         count_tries = 0
         while count_tries < 100:
-            coord_y = random.randint(0,self.dim[0])
-            coord_x = random.randint(0,self.dim[1])
-            if self.is_position_free_valid((coord_y,coord_x)):
-                return (coord_y,coord_x)
+            coord_y = random.randint(0, self.dim[0])
+            coord_x = random.randint(0, self.dim[1])
+            if self.is_position_free_valid((coord_y, coord_x)):
+                return (coord_y, coord_x)
             count_tries += 1
 
         raise Exception("No free coordinate found")
 
-
-
-    def add_agent(self, coord = None, capacity=10):
+    def add_agent(self, coord=None, capacity=10):
         """Initial function for the environment.
 
         Called to set up all basic things for the environment.
@@ -168,7 +170,7 @@ class Environment:
                 print("Handled exception")
                 exception_caught = True
 
-        else if not self.is_position_free_valid(coord):
+        elif not self.is_position_free_valid(coord):
             print("Can not add agent at this position")
             exception_caught = True
 
@@ -177,10 +179,9 @@ class Environment:
 
         id = len(self.agents)
         # Add agent to list and grid
-        self.agents.append(Agent(pos = coord, id = id, capacity = capacity))
+        self.agents.append(Agent(pos=coord, id=id, capacity=capacity))
         self.agent_grid[coord] = id
         return True
-
 
     def move_agent(agent_idx, delta_coords):
         """
@@ -203,7 +204,7 @@ class Environment:
             self.agent_grid[old_pos] = 0
 
             # Does the robot see trash on the new position?
-            update_visible_trash_grid(old_pos,new_pos)
+            update_visible_trash_grid(old_pos, new_pos)
             trash_eaten = let_agent_eat_trash(my_agent)
             if trash_eaten:
                 reward = REWARD_EAT_TRASH
@@ -226,7 +227,7 @@ class Environment:
         return GaussianTrashSource(mean=mean, max_y=self.dim[0], max_x=self.dim[1])
 
 
-    def generate_new_trash(alpha=None):
+    def generate_new_trash(self, alpha=None):
         """
         Each trashsource of the environment is, with probability alpha,
         asked to generate a piece of trash that will then appear on the grid.
@@ -240,7 +241,7 @@ class Environment:
                 trash_y,trash_x = source.get_trash()
                 self.trash_grid_complete[trash_y,trash_x] += 1
 
-    def update_visible_trash_grid(old_pos, new_pos):
+    def update_visible_trash_grid(self, old_pos, new_pos):
         """
             Called when moving an agent from old_pos to new_pos
 
@@ -251,9 +252,7 @@ class Environment:
         trash_present = self.trash_grid[new_pos] > 0
         self.visible_trash_grid[new_pos] = trash_present
 
-
-
-    def let_agent_eat_trash(my_agent):
+    def let_agent_eat_trash(self, my_agent):
         """
             Lets my_agent try to eat some trash at his position.
             Checks for trash and updates trash_grid, visible_trash_grid and
@@ -268,12 +267,11 @@ class Environment:
 
         return trash_eaten
 
-
     def move_agents(self, action_list):
         """Updates the environment with the actions in the list.
 
-        Conversion from the action into the actual change of coordinate (check if this action is possible
-        is in self.move_agent)
+        Conversion from the action into the actual change of coordinate (check
+        if this action is possible is in self.move_agent)
 
         Returns the
 
@@ -288,8 +286,7 @@ class Environment:
         agent_idx = 0
         reward_list = []
         for action in action_list:
-            conversion_action_coord = {0:[-1,0], 1: [0,1], 2:[1,0], 3:[0,1], 4:[0,0]}
-            d_pos = conversion_action_coord[action]
+            d_pos = Motion(action).value
             reward_list.append(self.move_agent(agent_idx, d_pos))
             agent_idx = agent_idx + 1
 
@@ -297,31 +294,36 @@ class Environment:
         generate_new_trash()
         #Save the current conditions (Stempeluhr) as next Timestep
         self.save_condition_new_timestep()
-        history_visible_trash, history_agents current_pos_agent = self.export_known_data()
+        history_visible_trash, history_agents, current_pos_agent = self.export_known_data()
 
+        # numpy array n_agents x grid_height x grid_widht X (n_number_timesteps x Channel (own_position (one_hot_vector), other_position (one_hot_vector), garbish)
         return history_visible_trash, history_agents, current_pos_agent, reward_list
 
-
-        #numpy array n_agents x grid_height x grid_widht X (n_number_timesteps x Channel (own_position (one_hot_vector), other_position (one_hot_vector), garbish)
-    def save_condition_new_timestep():
-        """Adds the current condition to the state space and removes the oldest one
-            Saves the agent_grid and the trash_grid_visible matrix
+    def save_condition_new_timestep(self):
         """
-        #Add the new ones
+        Adds the current condition to the state space and removes the oldest one
+        Saves the agent_grid and the trash_grid_visible matrix
+        """
+        # add the new ones
         self.history_agent_grids.append(self.agent_grid)
-        self.history_visible_trash_grids.append(self.trash_grid_visible) #Only the visible trash is saved
+        self.history_visible_trash_grids.append(self.trash_grid_visible)
 
-        #Remove the oldest appended data
+        # remove the oldest appended data
         del(self.history_agent_grids[0])
         del(self.history_visible_trash_grids[0])
 
-    def export_known_data():
-        """Exports the data (states) to the neural network.
+    def export_known_data(self):
+        """
+        Exports the data (states) to the neural network.
 
-        Function is called to get the data from history_agent_grids and the history_visible_trash_grids.
-        They also are converted into kind of one hot matrix (1 is indicating where the object is, but there could be several 1). Additionaly the current location of each agent isstored
-        as a one hot matrix. Each type of data is return seperately in order to obtain flexibility in the format
-        The last element in the 0 dimension (for history_visible_trash and history_agent) is the most actual state
+        Function is called to get the data from history_agent_grids and the
+        history_visible_trash_grids. They also are converted into kind of one
+        hot matrix (1 is indicating where the object is, but there could be
+        several 1). Additionaly the current location of each agent is stored as
+        a one hot matrix. Each type of data is return seperately in order to
+        obtain flexibility in the format. The last element in the 0 dimension
+        (for history_visible_trash and history_agent) is the most actual state
+
         n: number of saved timesteps
         Return
         -------
@@ -339,13 +341,13 @@ class Environment:
         history_visible_trash[history_visible_trash>0] = 1 # 1 indicates trash, 0 elsewhere
 
         history_agents = np.array(self.history_agent_grids)
-        history_agents [history_agent> 0] = 1  # 1 indicates an agent, 0 if there is no agent
+        history_agents[history_agents > 0] = 1  # 1 indicates an agent, 0 if there is no agent
 
         current_pos_agent = np.zeros((len(self.agents), self.dim[0], self.dim[1]))
-        #Iterating over the list of agents to set the position of each agent in another field to 1
+        # Iterating over the list of agents to set the position of each agent in another field to 1
         agent_counter = 0
         for agent in self.agents:
-            y,x =agent.pos[0], agent.pos[1]
+            y, x = agent.pos[0], agent.pos[1]
             current_pos_agent[agent_counter][y][x] = 1
 
         return history_visible_trash, history_agents, current_pos_agent
