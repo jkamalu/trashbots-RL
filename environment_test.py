@@ -1,9 +1,9 @@
 """
-Script to test the environment 
+Script to test the environment
 """
 
-import environment
-import numpy as np 
+import Environment
+import numpy as np
 def simulated_get_actions(seed_value = 0, number_created_agents = 1):
     #Returns a random actions list for each robot
     np.random.seed(seed_value)
@@ -13,25 +13,25 @@ def simulated_get_actions(seed_value = 0, number_created_agents = 1):
 
     return action_list
 
-#Test variables 
+#Test variables
 number_agents = 16
 capacity_per_agent = 10
 number_simulated_steps = 5
 
-#Print statements 
+#Print statements
 print_history = False
 print_each_agents_view = True
 
-#Create an environment with the dimensionality dim  
+#Create an environment with the dimensionality dim
 dim = (4,4)
 test_environment  = environment.Environment(dim = dim )
 number_created_agents = 0
-#Add the agents 
-for i in range(0, number_agents): 
+#Add the agents
+for i in range(0, number_agents):
     if(test_environment.add_agent(coord = None, capacity= capacity_per_agent)):
         print("Agent {} is created succesfully".format(i))
         number_created_agents += 1
-    else: 
+    else:
         print("Agent {} isn't created".format(i))
 
 
