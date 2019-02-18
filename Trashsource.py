@@ -19,7 +19,7 @@ class GaussianTrashSource:
             # mean of the gaussian
             self.mean = mean
             # covariance matrix of the multivariate gaussian
-            if cov==None:
+            if cov is None:
                 cov = [[1,0],
                         [0,1]]
             self.cov = cov

@@ -122,7 +122,7 @@ class Environment:
     def get_complete_trash_grid(self):
         return self.trash_grid_complete
 
-    def get_agent_grid():
+    def get_agent_grid(self):
         return self.agent_grid
 
     def get_rnd_free_position(self):
@@ -183,7 +183,7 @@ class Environment:
         self.agent_grid[coord] = id
         return True
 
-    def move_agent(agent_idx, delta_coords):
+    def move_agent(self, agent_idx, delta_coords):
         """
         - Moves agent (if move is valid)
         - Eats trash if there is some on the new position.
@@ -203,9 +203,8 @@ class Environment:
             self.agent_grid[new_pos] = my_agent.id
             self.agent_grid[old_pos] = 0
 
-            # Does the robot see trash on the new position?
-            update_visible_trash_grid(old_pos, new_pos)
-            trash_eaten = let_agent_eat_trash(my_agent)
+            # Trash eating
+            trash_eaten = self.move_agent_in_trash_world(old_pos, new_pos)
             if trash_eaten:
                 reward = REWARD_EAT_TRASH
         else:
@@ -214,7 +213,32 @@ class Environment:
 
         return reward
 
-    def create_random_trash_source():
+    def move_agent_in_trash_world(self, old_pos, new_pos):
+        """
+        Called from move_agent() to move an agent from old_pos to new_pos.
+        Applies the agents move (old_pos -> new_pos) to the "trash world".
+        Updates all trash related attributes, trash_grids etc.
+        Returns True iff the agent eats trash at new_pos
+        """
+        trash_eaten = False
+        # Does the robot see trash on the new position?
+        self.trash_grid_visible[old_pos] = 0
+        trash_present = self.trash_grid_complete[new_pos] > 0
+        # Eat trash if there is some
+        if trash_present:
+            # visible only stores whether there is currently an agent collecting trash
+            self.trash_grid_visible[new_pos] = 1
+            # complete stores the amount of trash present
+            self.trash_grid_complete[new_pos] -= 1
+            my_agent.load += 1
+            my_agent.totally_collected += 1
+            trash_eaten = True
+        else:
+            self.trash_grid_visible[new_pos] = 0
+
+        return trash_eaten
+
+    def create_random_trash_source(self):
         """
         Creates a Trashsource with a random position on the grid.
         The trash source is NOT automatically added somewhere!
@@ -241,31 +265,6 @@ class Environment:
                 trash_y,trash_x = source.get_trash()
                 self.trash_grid_complete[trash_y,trash_x] += 1
 
-    def update_visible_trash_grid(self, old_pos, new_pos):
-        """
-            Called when moving an agent from old_pos to new_pos
-
-            Sets visible_trash_grid of old_pos to zero
-            Sets visible_trash_grid of new_pos to one if there is some trash
-        """
-        self.visible_trash_grid[old_pos] = 0
-        trash_present = self.trash_grid[new_pos] > 0
-        self.visible_trash_grid[new_pos] = trash_present
-
-    def let_agent_eat_trash(self, my_agent):
-        """
-            Lets my_agent try to eat some trash at his position.
-            Checks for trash and updates trash_grid, visible_trash_grid and
-            my_agents attributes.
-        """
-        trash_eaten = False
-        if self.trash_grid[my_agent.pos] > 0:
-            self.trash_grid[new_pos] -= 1
-            my_agent.load += 1
-            my_agent.totally_collected += 1
-            trash_eaten = True
-
-        return trash_eaten
 
     def move_agents(self, action_list):
         """Updates the environment with the actions in the list.
