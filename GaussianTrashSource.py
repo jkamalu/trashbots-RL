@@ -25,8 +25,8 @@ class GaussianTrashSource:
             self.cov = cov
 
             # strict limits to the gaussian
-            self.max_x = max_x
-            self.max_y = max_y
+            self.max_x = max_x - 1 
+            self.max_y = max_y - 1 
 
             # Just an id of the trashsource
             self.id = id
@@ -37,8 +37,8 @@ class GaussianTrashSource:
 
             """
             y, x = multivariate_normal(self.mean, self.cov,1)[0]
-            y = min(self.max_y, round(y))
-            x = min(self.max_x, round(x))
+            y = int(min(self.max_y, round(y)))
+            x = int(min(self.max_x, round(x)))
 
             return [y, x]
 
