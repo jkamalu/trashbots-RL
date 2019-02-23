@@ -38,9 +38,9 @@ class Heatmap:
             raise Exception("can't show map, too many steps")
 
 
-        heat_map = self.get_heatmap(num_steps)
+        heat_map = self.get_heatmap(num_steps).astype(float)
         sum_all_positions = sum(sum(heat_map))#sum over columns and rows
-        heat_map /= sum_all_positions
+        heat_map /= float(sum_all_positions)
 
         # Plot the heatmap
         fig, ax = plt.subplots()

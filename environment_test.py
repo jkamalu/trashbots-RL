@@ -56,7 +56,7 @@ for i in range(0, NUMBER_AGENTS):
 
 for step in range(0, NUMBER_SIMULATED_STEPS):
     print("{}. step started".format(step))
-    history_visible_trash, history_agents, current_pos_agent, trash_grid_complete = test_environment.debug_data_export()
+    history_visible_trash, history_agents, current_pos_agent, trash_grid_complete, trash_sources = test_environment.debug_data_export()
     if(PRINT_OVERVIEW_AGENTS):
         print("Current overview of all agents:\n {}".format(history_agents[-1]))
     if(PRINT_HISTORY):

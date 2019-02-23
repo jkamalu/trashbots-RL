@@ -23,8 +23,8 @@ class GaussianTrashSource:
             self.cov = cov
 
             # strict limits to the gaussian
-            self.max_x = max_x - 1 
-            self.max_y = max_y - 1 
+            self.max_x = max_x
+            self.max_y = max_y
 
             # Just an id of the trashsource
             self.id = id
