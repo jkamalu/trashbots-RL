@@ -61,15 +61,15 @@ class Environment:
 
         """
         #Important Parameter initialization
-        self.saved_timesteps = 1 # Number of timesteps saved for the neural network
+        self.saved_timesteps = saved_timesteps # Number of timesteps saved for the neural network
         self.dim = dim # (y,x)
 
         # Constants that will be used all throughout the code
-        
-        self.REWARD_EAT_TRASH = reward_eat_trash #Default is 1 
-        self.REWARD_INVALID_MOVE = reward_invalid_move #Default is -1 
+
+        self.REWARD_EAT_TRASH = reward_eat_trash #Default is 1
+        self.REWARD_INVALID_MOVE = reward_invalid_move #Default is -1
         self.REWARD_NOTHING_HAPPEND = reward_nothing_happend #Default is 0
-        self.TRASH_APPEARENCE_PROB = trash_appearence_prob #Default is 0.1 
+        self.TRASH_APPEARENCE_PROB = trash_appearence_prob #Default is 0.1
         self.NUMBER_TRASH_SOURCES = number_trash_sources  #Default is 4
         # initialize trash grid
         self.trash_grid_visible = np.zeros(shape=(self.dim[0], self.dim[1]), dtype=int)
@@ -93,7 +93,7 @@ class Environment:
         for timestep_counter in range(0, self.saved_timesteps):
             self.history_agent_grids.append(self.agent_grid)
             self.history_visible_trash_grids.append(self.trash_grid_visible)
-        
+
 
     # Getter Methods
     def get_agent_position(self, id):
@@ -108,11 +108,13 @@ class Environment:
         Checks if a field is free so that an agent can move/appear there.
         a field is free and valid if it is inside the grid and there is
         no robot on the field.
-
+        
+        Parameters
         ----------
         coord : int tuple / None
             Coordinates where the new agent should appear (place in the grid
             has to be free that the agent appears there) . And has to be valid
+        
         return
         -------
         bool
@@ -135,12 +137,13 @@ class Environment:
         """
          Returns a coordinate of the grid that is currently not occupied
          by any agent.
-         If no free coordinate was found an exception is raised
+         If no free coordinate was found an exception is raised. To find a free
+         coordinate it tries randomly for 100 times if there is a free spot. 
 
          return
          -------
          tuple int:
-            If there is a free position (random 100 tries), this is returned as tuple
+            If there is a free position, this is returned as tuple
         """
         count_tries = 0
         while count_tries < 100:
@@ -160,11 +163,15 @@ class Environment:
         ----------
         coord : int tuple / None
             Coordinates where the new agent should appear (place in the grid has to
-            be free that the agent appears there).
+            be free that the agent appears there). Succesful created agents will have an idea 
+            that correspondend to the number of already created agents. 
         capacity: int
             Default is 10. Defines how much the agent could carry
 
+        Return
         -------
+        bool:
+            Returns if adding the agent was succesful. 
 
         """
         exception_caught = False
@@ -182,7 +189,7 @@ class Environment:
         if exception_caught:
             return False
         #TODO:  see Issue #4
-        
+
         id = self.number_agents_total #Every Agent has the ID of Agents that have been created before (doesn't get reduced if the agents are removed)
         self.number_agents_total += 1 #Update the number of agents which have ever been created
         # Add agent to list and grid
@@ -192,17 +199,21 @@ class Environment:
 
     def move_agent(self, agent_idx, delta_coords):
         """
-        -Moves agent (if move is valid)
+        - Moves agent (if move is valid)
         - Eats trash if there is some on the new position.
-        - Returns
-
+        - Returns the Reward that is collected with this move (e.g. eat trash)
+        
+        Parameters
         ----------
-        agent_idx : int tuple 
+        agent_idx : int tuple
             ID of the agent.
         delta_coords: int tuple
             Defines how the y,x coordinates should change
-
+        
+        Return 
         -------
+        int: 
+            Amount of collected reward with this move
         """
 
         # Check move for validity
@@ -239,9 +250,23 @@ class Environment:
         Applies the agents move (old_pos -> new_pos) to the "trash world".
         Updates all trash related attributes, trash_grids etc.
         Returns True if the agent eats trash at new_pos
-
-
+        
+        Parameters
+        ----------
+        old_pos : int tuple 
+            y,x coordinate of the old position.
+        new_pos: int tuple
+            y,x coordinate of the agent after the move (could be the same as of old position if the move is invalid or stay)
+        my_agent: Agent object
+            The instance of the Agent that should be moved
+        
+        Return 
+        -------
+        int: 
+            Amount of trash that have been eaten
         """
+
+        
         trash_eaten = False
         trash_present = self.trash_grid_complete[new_pos] > 0
         # Eat trash if there is some
@@ -263,7 +288,10 @@ class Environment:
         Creates a Trashsource with a random position on the grid.
         The trash source is NOT automatically added somewhere!
 
-        Returns the Trashsource
+        Return 
+        -------
+        GaussianTrashSource: 
+            Returns the create Trashsource as an instance of the GaussianTrashSource class
         """
         mean_x = random.randint(0, self.dim[1])
         mean_y = random.randint(0, self.dim[0])
@@ -276,7 +304,14 @@ class Environment:
         Each trashsource of the environment is, with probability alpha,
         asked to generate a piece of trash that will then appear on the grid.
         New trash will be added to the trash_grid_complete
+
+        Parameters
+        ----------
+        alpha : float / None 
+            Probability for each Trash Source to generate Trash. If alpha is None the 
+            self.TRASH_APPEARENCE_PROB probability is used. 
         """
+        
         if alpha is None:
             alpha = self.TRASH_APPEARENCE_PROB
 
@@ -292,7 +327,8 @@ class Environment:
         Conversion from the action into the actual change of coordinate (check
         if this action is possible is in self.move_agent)
 
-        Returns the
+        Returns the current state that is used by the neural net as well as the rewards
+        collected by the moves of the action_list
 
         Parameters
         ----------
@@ -300,7 +336,13 @@ class Environment:
             Containing the actions for each agent (0: up, 1: right, 2: down, 3: left, 4: stay)
             Agents are ordered as in the self.agents list.
             Dimension: 1 x Number of agents
+        Return
         -------
+        ndarray: 
+            History over the visible trash, for each saved timestep. (Dimension: grid_height x grid_width x saved_timesteps)
+        
+        ndarray:
+            
         """
         agent_idx = 0
         reward_list = []
@@ -362,7 +404,7 @@ class Environment:
             current_pos_agent[agent_counter][y][x] = 1
             agent_counter += 1
         return ret_history_visible_trash_grids, ret_history_agents, current_pos_agent
-    
+
     def debug_data_export(self):
         """Exports all data of the current stats for debug reasons. Extends the export_known_data_function with complete_trash_grid
 
@@ -379,7 +421,7 @@ class Environment:
                 Matrix of format nb_agents * self.dim[0] * self.dim[1], one hot matrix for each agent (in the same order as the agents are in self.agents)
                 indicating the position of the agent
 
-            trash_grid_complete: 
+            trash_grid_complete:
                 Matrix of format self.dim[0] * self.dim[1]. Indicates the complete (partly for the agents unknown) distribution of trash
         """
         ret_history_visible_trash_grids, ret_history_agents, current_pos_agent = self.export_known_data()

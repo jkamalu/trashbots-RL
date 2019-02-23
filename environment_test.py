@@ -26,6 +26,7 @@ REWARD_INVALID_MOVE = -1 #Default is -1
 REWARD_NOTHING_HAPPEND = 0 #Default is 0
 TRASH_APPEARENCE_PROB = 1 #Default is 0.1 
 NUMBER_TRASH_SOURCES = 4  #Default is 4
+SAVED_TIMESTEPS = 3 
 
 #Print statements
 PRINT_OVERVIEW_AGENTS = False
@@ -38,9 +39,9 @@ PRINT_REWARD_LIST = True
 
 #Create an environment with the dimensionality dim
 
-test_environment = Environment.Environment(dim=DIM, REWARD_EAT_TRASH = REWARD_EAT_TRASH,\
-    REWARD_INVALID_MOVE = REWARD_INVALID_MOVE, REWARD_NOTHING_HAPPEND = REWARD_NOTHING_HAPPEND,\
-       TRASH_APPEARENCE_PROB = TRASH_APPEARENCE_PROB, NUMBER_TRASH_SOURCES = NUMBER_TRASH_SOURCES )
+test_environment = Environment.Environment(dim=DIM, reward_eat_trash=REWARD_EAT_TRASH, reward_invalid_move=REWARD_EAT_TRASH,
+ reward_nothing_happend=REWARD_NOTHING_HAPPEND, trash_appearence_prob=TRASH_APPEARENCE_PROB, 
+ number_trash_sources=NUMBER_TRASH_SOURCES, saved_timesteps=SAVED_TIMESTEPS)
 
 
 number_created_agents = 0
