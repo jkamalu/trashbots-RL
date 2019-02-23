@@ -61,7 +61,7 @@ class Environment:
 
         """
         #Important Parameter initialization
-        self.saved_timesteps = 1 # Number of timesteps saved for the neural network
+        self.saved_timesteps = saved_timesteps # Number of timesteps saved for the neural network
         self.dim = dim # (y,x)
 
         # Constants that will be used all throughout the code
@@ -342,7 +342,7 @@ class Environment:
             History over the visible trash, for each saved timestep. (Dimension: grid_height x grid_width x saved_timesteps)
         
         ndarray:
-            
+
         """
         agent_idx = 0
         reward_list = []
