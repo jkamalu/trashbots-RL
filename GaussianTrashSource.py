@@ -2,7 +2,7 @@ from numpy.random import multivariate_normal
 
 class GaussianTrashSource:
 
-        def __init__(self, mean, max_y, max_x, cov=None, id=None):
+        def __init__(self, mean, max_y, max_x, cov=[[1,0],[0,1]], id=None):
             """
             Creates a trashsource
 
@@ -19,9 +19,7 @@ class GaussianTrashSource:
             # mean of the gaussian
             self.mean = mean
             # covariance matrix of the multivariate gaussian
-            if cov==None:
-                cov = [[1,0],
-                        [0,1]]
+                
             self.cov = cov
 
             # strict limits to the gaussian

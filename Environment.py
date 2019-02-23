@@ -47,7 +47,7 @@ class Environment:
     """
 
 
-    def __init__(self, dim, REWARD_EAT_TRASH = 1, REWARD_INVALID_MOVE = -1, REWARD_NOTHING_HAPPEND = 0, TRASH_APPEARENCE_PROB = 0.1, NUMBER_TRASH_SOURCES = 4):
+    def __init__(self, dim, REWARD_EAT_TRASH = 100, REWARD_INVALID_MOVE = -1, REWARD_NOTHING_HAPPEND = 0, TRASH_APPEARENCE_PROB = 0.1, NUMBER_TRASH_SOURCES = 1):
         """Initial function for the environment.
 
         Called to set up all basic things for the environment.
@@ -61,7 +61,7 @@ class Environment:
 
         """
         #Important Parameter initialization
-        self.saved_timesteps = 3 # Number of timesteps saved for the neural network
+        self.saved_timesteps = 1 # Number of timesteps saved for the neural network
         self.dim = dim # (y,x)
 
         # Constants that will be used all throughout the code
@@ -255,7 +255,7 @@ class Environment:
         mean_x = random.randint(0, self.dim[1])
         mean_y = random.randint(0, self.dim[0])
         mean = [mean_y,mean_x]
-        return GaussianTrashSource(mean=mean, max_y=self.dim[0], max_x=self.dim[1])
+        return GaussianTrashSource(mean=mean, max_y=self.dim[0], max_x=self.dim[1], cov = [[0,0],[0,0]])
 
 
     def generate_new_trash(self, alpha=None):
@@ -270,7 +270,6 @@ class Environment:
         for source in self.trash_sources:
             if random.random() < alpha:
                 trash_y, trash_x = source.get_trash()
-                print("Added new Trash at: {}, {}".format(trash_y, trash_x))
                 self.trash_grid_complete[trash_y, trash_x] += 1
 
 
