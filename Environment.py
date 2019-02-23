@@ -89,6 +89,7 @@ class Environment:
             self.trash_sources.append(self.create_random_trash_source())
         # Keep track of all agents
         self.agents = []
+        self.number_agents_total = 0 #Number of every created agents (even if they have been deleted)
         for timestep_counter in range(0, self.saved_timesteps):
             self.history_agent_grids.append(self.agent_grid)
             self.history_visible_trash_grids.append(self.trash_grid_visible)
@@ -181,7 +182,9 @@ class Environment:
         if exception_caught:
             return False
         #TODO:  see Issue #4
-        id = len(self.agents)
+        
+        id = self.number_agents_total #Every Agent has the ID of Agents that have been created before (doesn't get reduced if the agents are removed)
+        self.number_agents_total += 1 #Update the number of agents which have ever been created
         # Add agent to list and grid
         self.agents.append(Agent(pos=coord, id=id, capacity=capacity))
         self.agent_grid[coord] = id
@@ -189,9 +192,17 @@ class Environment:
 
     def move_agent(self, agent_idx, delta_coords):
         """
-        - Moves agent (if move is valid)
+        -Moves agent (if move is valid)
         - Eats trash if there is some on the new position.
         - Returns
+
+        ----------
+        agent_idx : int tuple 
+            ID of the agent.
+        delta_coords: int tuple
+            Defines how the y,x coordinates should change
+
+        -------
         """
 
         # Check move for validity
@@ -227,7 +238,9 @@ class Environment:
         Called from move_agent() to move an agent from old_pos to new_pos.
         Applies the agents move (old_pos -> new_pos) to the "trash world".
         Updates all trash related attributes, trash_grids etc.
-        Returns True iff the agent eats trash at new_pos
+        Returns True if the agent eats trash at new_pos
+
+
         """
         trash_eaten = False
         trash_present = self.trash_grid_complete[new_pos] > 0
