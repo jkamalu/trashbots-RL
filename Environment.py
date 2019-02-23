@@ -47,7 +47,7 @@ class Environment:
     """
 
 
-    def __init__(self, dim, REWARD_EAT_TRASH = 10, REWARD_INVALID_MOVE = 0, REWARD_NOTHING_HAPPEND = 0, TRASH_APPEARENCE_PROB = 0.1, NUMBER_TRASH_SOURCES = 1, saved_timesteps = 1):
+    def __init__(self, dim, reward_eat_trash=10, reward_invalid_move=0, reward_nothing_happend=0, trash_appearence_prob=0.1, number_trash_sources=1, saved_timesteps=1):
         """Initial function for the environment.
 
         Called to set up all basic things for the environment.
@@ -61,16 +61,16 @@ class Environment:
 
         """
         #Important Parameter initialization
-        self.saved_timesteps = 1 # Number of timesteps saved for the neural network
+        self.saved_timesteps = saved_timesteps # Number of timesteps saved for the neural network
         self.dim = dim # (y,x)
 
         # Constants that will be used all throughout the code
-        
-        self.REWARD_EAT_TRASH = REWARD_EAT_TRASH #Default is 1 
-        self.REWARD_INVALID_MOVE = REWARD_INVALID_MOVE #Default is -1 
-        self.REWARD_NOTHING_HAPPEND = REWARD_NOTHING_HAPPEND #Default is 0
-        self.TRASH_APPEARENCE_PROB = TRASH_APPEARENCE_PROB #Default is 0.1 
-        self.NUMBER_TRASH_SOURCES = NUMBER_TRASH_SOURCES  #Default is 4
+
+        self.REWARD_EAT_TRASH = reward_eat_trash #Default is 1
+        self.REWARD_INVALID_MOVE = reward_invalid_move #Default is -1
+        self.REWARD_NOTHING_HAPPEND = reward_nothing_happend #Default is 0
+        self.TRASH_APPEARENCE_PROB = trash_appearence_prob #Default is 0.1
+        self.NUMBER_TRASH_SOURCES = number_trash_sources  #Default is 4
         # initialize trash grid
         self.trash_grid_visible = np.zeros(shape=(self.dim[0], self.dim[1]), dtype=int)
         self.trash_grid_complete = np.zeros(shape=(self.dim[0], self.dim[1]), dtype=int)
@@ -89,10 +89,11 @@ class Environment:
             self.trash_sources.append(self.create_random_trash_source())
         # Keep track of all agents
         self.agents = []
+        self.number_agents_total = 0 #Number of every created agents (even if they have been deleted)
         for timestep_counter in range(0, self.saved_timesteps):
             self.history_agent_grids.append(self.agent_grid)
             self.history_visible_trash_grids.append(self.trash_grid_visible)
-        
+
 
     # Getter Methods
     def get_agent_position(self, id):
@@ -181,7 +182,9 @@ class Environment:
         if exception_caught:
             return False
         #TODO:  see Issue #4
-        id = len(self.agents)
+
+        id = self.number_agents_total #Every Agent has the ID of Agents that have been created before (doesn't get reduced if the agents are removed)
+        self.number_agents_total += 1 #Update the number of agents which have ever been created
         # Add agent to list and grid
         self.agents.append(Agent(pos=coord, id=id, capacity=capacity))
         self.agent_grid[coord] = id
@@ -189,9 +192,17 @@ class Environment:
 
     def move_agent(self, agent_idx, delta_coords):
         """
-        - Moves agent (if move is valid)
+        -Moves agent (if move is valid)
         - Eats trash if there is some on the new position.
         - Returns
+
+        ----------
+        agent_idx : int tuple
+            ID of the agent.
+        delta_coords: int tuple
+            Defines how the y,x coordinates should change
+
+        -------
         """
 
         # Check move for validity
@@ -219,7 +230,7 @@ class Environment:
             # TODO: See issue #6
             # Invalid move
             reward = self.REWARD_INVALID_MOVE
-            
+
         return reward
 
     def move_agent_in_trash_world(self, old_pos, new_pos, my_agent):
@@ -227,7 +238,9 @@ class Environment:
         Called from move_agent() to move an agent from old_pos to new_pos.
         Applies the agents move (old_pos -> new_pos) to the "trash world".
         Updates all trash related attributes, trash_grids etc.
-        Returns True iff the agent eats trash at new_pos
+        Returns True if the agent eats trash at new_pos
+
+
         """
         trash_eaten = False
         trash_present = self.trash_grid_complete[new_pos] > 0
@@ -349,7 +362,7 @@ class Environment:
             current_pos_agent[agent_counter][y][x] = 1
             agent_counter += 1
         return ret_history_visible_trash_grids, ret_history_agents, current_pos_agent
-    
+
     def debug_data_export(self):
         """Exports all data of the current stats for debug reasons. Extends the export_known_data_function with complete_trash_grid
 
@@ -366,7 +379,7 @@ class Environment:
                 Matrix of format nb_agents * self.dim[0] * self.dim[1], one hot matrix for each agent (in the same order as the agents are in self.agents)
                 indicating the position of the agent
 
-            trash_grid_complete: 
+            trash_grid_complete:
                 Matrix of format self.dim[0] * self.dim[1]. Indicates the complete (partly for the agents unknown) distribution of trash
         """
         ret_history_visible_trash_grids, ret_history_agents, current_pos_agent = self.export_known_data()
