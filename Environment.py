@@ -47,7 +47,7 @@ class Environment:
     """
 
 
-    def __init__(self, dim, REWARD_EAT_TRASH = 100, REWARD_INVALID_MOVE = -1, REWARD_NOTHING_HAPPEND = 0, TRASH_APPEARENCE_PROB = 0.1, NUMBER_TRASH_SOURCES = 1):
+    def __init__(self, dim, REWARD_EAT_TRASH = 10, REWARD_INVALID_MOVE = 0, REWARD_NOTHING_HAPPEND = 0, TRASH_APPEARENCE_PROB = 0.1, NUMBER_TRASH_SOURCES = 1, saved_timesteps = 1):
         """Initial function for the environment.
 
         Called to set up all basic things for the environment.
@@ -219,7 +219,7 @@ class Environment:
             # TODO: See issue #6
             # Invalid move
             reward = self.REWARD_INVALID_MOVE
-
+            
         return reward
 
     def move_agent_in_trash_world(self, old_pos, new_pos, my_agent):
