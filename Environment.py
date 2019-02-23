@@ -65,11 +65,11 @@ class Environment:
         self.dim = dim # (y,x)
 
         # Constants that will be used all throughout the code
-        
-        self.REWARD_EAT_TRASH = reward_eat_trash #Default is 1 
-        self.REWARD_INVALID_MOVE = reward_invalid_move #Default is -1 
+
+        self.REWARD_EAT_TRASH = reward_eat_trash #Default is 1
+        self.REWARD_INVALID_MOVE = reward_invalid_move #Default is -1
         self.REWARD_NOTHING_HAPPEND = reward_nothing_happend #Default is 0
-        self.TRASH_APPEARENCE_PROB = trash_appearence_prob #Default is 0.1 
+        self.TRASH_APPEARENCE_PROB = trash_appearence_prob #Default is 0.1
         self.NUMBER_TRASH_SOURCES = number_trash_sources  #Default is 4
         # initialize trash grid
         self.trash_grid_visible = np.zeros(shape=(self.dim[0], self.dim[1]), dtype=int)
@@ -93,7 +93,7 @@ class Environment:
         for timestep_counter in range(0, self.saved_timesteps):
             self.history_agent_grids.append(self.agent_grid)
             self.history_visible_trash_grids.append(self.trash_grid_visible)
-        
+
 
     # Getter Methods
     def get_agent_position(self, id):
@@ -189,7 +189,7 @@ class Environment:
         if exception_caught:
             return False
         #TODO:  see Issue #4
-        
+
         id = self.number_agents_total #Every Agent has the ID of Agents that have been created before (doesn't get reduced if the agents are removed)
         self.number_agents_total += 1 #Update the number of agents which have ever been created
         # Add agent to list and grid
@@ -205,7 +205,7 @@ class Environment:
         
         Parameters
         ----------
-        agent_idx : int tuple 
+        agent_idx : int tuple
             ID of the agent.
         delta_coords: int tuple
             Defines how the y,x coordinates should change
@@ -404,7 +404,7 @@ class Environment:
             current_pos_agent[agent_counter][y][x] = 1
             agent_counter += 1
         return ret_history_visible_trash_grids, ret_history_agents, current_pos_agent
-    
+
     def debug_data_export(self):
         """Exports all data of the current stats for debug reasons. Extends the export_known_data_function with complete_trash_grid
 
@@ -421,7 +421,7 @@ class Environment:
                 Matrix of format nb_agents * self.dim[0] * self.dim[1], one hot matrix for each agent (in the same order as the agents are in self.agents)
                 indicating the position of the agent
 
-            trash_grid_complete: 
+            trash_grid_complete:
                 Matrix of format self.dim[0] * self.dim[1]. Indicates the complete (partly for the agents unknown) distribution of trash
         """
         ret_history_visible_trash_grids, ret_history_agents, current_pos_agent = self.export_known_data()

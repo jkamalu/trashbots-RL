@@ -2,6 +2,8 @@ from aenum import MultiValueEnum
 
 
 class Motion(MultiValueEnum):
+    
+    __order__ = "North East South West Stay"
 
     North = (-1, 0), 0
 
