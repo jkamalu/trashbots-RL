@@ -47,7 +47,7 @@ class Environment:
     """
 
 
-    def __init__(self, dim, REWARD_EAT_TRASH = 10, REWARD_INVALID_MOVE = 0, REWARD_NOTHING_HAPPEND = 0, TRASH_APPEARENCE_PROB = 0.1, NUMBER_TRASH_SOURCES = 1, saved_timesteps = 1):
+    def __init__(self, dim, reward_eat_trash=10, reward_invalid_move=0, reward_nothing_happend=0, trash_appearence_prob=0.1, number_trash_sources=1, saved_timesteps=1):
         """Initial function for the environment.
 
         Called to set up all basic things for the environment.
@@ -66,11 +66,11 @@ class Environment:
 
         # Constants that will be used all throughout the code
         
-        self.REWARD_EAT_TRASH = REWARD_EAT_TRASH #Default is 1 
-        self.REWARD_INVALID_MOVE = REWARD_INVALID_MOVE #Default is -1 
-        self.REWARD_NOTHING_HAPPEND = REWARD_NOTHING_HAPPEND #Default is 0
-        self.TRASH_APPEARENCE_PROB = TRASH_APPEARENCE_PROB #Default is 0.1 
-        self.NUMBER_TRASH_SOURCES = NUMBER_TRASH_SOURCES  #Default is 4
+        self.REWARD_EAT_TRASH = reward_eat_trash #Default is 1 
+        self.REWARD_INVALID_MOVE = reward_invalid_move #Default is -1 
+        self.REWARD_NOTHING_HAPPEND = reward_nothing_happend #Default is 0
+        self.TRASH_APPEARENCE_PROB = trash_appearence_prob #Default is 0.1 
+        self.NUMBER_TRASH_SOURCES = number_trash_sources  #Default is 4
         # initialize trash grid
         self.trash_grid_visible = np.zeros(shape=(self.dim[0], self.dim[1]), dtype=int)
         self.trash_grid_complete = np.zeros(shape=(self.dim[0], self.dim[1]), dtype=int)
@@ -219,7 +219,7 @@ class Environment:
             # TODO: See issue #6
             # Invalid move
             reward = self.REWARD_INVALID_MOVE
-            
+
         return reward
 
     def move_agent_in_trash_world(self, old_pos, new_pos, my_agent):
