@@ -9,7 +9,7 @@ from Agent import Agent
 # and manages the time discrete updates             #
 #####################################################
 
-EMPTY_TILE_ID = -1 #Defines the value assigned to a tile in self.agent_grid if there is no agent on a field
+EMPTY_TILE_ID = 0 #Defines the value assigned to a tile in self.agent_grid if there is no agent on a field
 
 
 
@@ -76,7 +76,7 @@ class Environment:
         self.trash_grid_complete = np.zeros(shape=(self.dim[0], self.dim[1]), dtype=int)
 
         # initialize robot grid
-        self.agent_grid = np.ones(shape=(self.dim[0], self.dim[1]), dtype=int) * EMPTY_TILE_ID
+        self.agent_grid = np.zeros(shape=(self.dim[0], self.dim[1]), dtype=int) * EMPTY_TILE_ID
 
         # History is the list of grids seen over time, first element is the oldest one,
         # last element in the list is the newest one, for the initialisation they are filled
@@ -190,7 +190,7 @@ class Environment:
             return False
         #TODO:  see Issue #4
 
-        id = self.number_agents_total #Every Agent has the ID of Agents that have been created before (doesn't get reduced if the agents are removed)
+        id = self.number_agents_total +1 #Every Agent has the ID of Agents that have been created before  +1 (doesn't get reduced if the agents are removed, first Agent ID is 1)
         self.number_agents_total += 1 #Update the number of agents which have ever been created
         # Add agent to list and grid
         self.agents.append(Agent(pos=coord, id=id, capacity=capacity))
@@ -293,10 +293,10 @@ class Environment:
         GaussianTrashSource: 
             Returns the create Trashsource as an instance of the GaussianTrashSource class
         """
-        mean_x = random.randint(0, self.dim[1])
-        mean_y = random.randint(0, self.dim[0])
+        mean_x = random.randint(0, self.dim[1]-1)
+        mean_y = random.randint(0, self.dim[0]-1)
         mean = [mean_y,mean_x]
-        return GaussianTrashSource(mean=mean, max_y=self.dim[0], max_x=self.dim[1], cov = [[0,0],[0,0]])
+        return GaussianTrashSource(mean=mean, max_y=self.dim[0]-1, max_x=self.dim[1]-1, cov = [[0,0],[0,0]])
 
 
     def generate_new_trash(self, alpha=None):
@@ -342,7 +342,7 @@ class Environment:
             History over the visible trash, for each saved timestep. (Dimension: grid_height x grid_width x saved_timesteps)
         
         ndarray:
-            
+
         """
         agent_idx = 0
         reward_list = []
@@ -394,7 +394,7 @@ class Environment:
         ret_history_visible_trash_grids[ret_history_visible_trash_grids>0] = 1 # 1 indicates trash, 0 elsewhere
 
         ret_history_agents = np.array(self.history_agent_grids)
-        ret_history_agents[ret_history_agents >= 0] = 1  # 1 indicates an agent, 0 if there is no agent
+        ret_history_agents[ret_history_agents > 0] = 1  # 1 indicates an agent, 0 if there is no agent
 
         current_pos_agent = np.zeros((len(self.agents), self.dim[0], self.dim[1]), dtype = int)
         #Iterating over the list of agents to set the position of each agent in another field to 1
@@ -423,6 +423,9 @@ class Environment:
 
             trash_grid_complete:
                 Matrix of format self.dim[0] * self.dim[1]. Indicates the complete (partly for the agents unknown) distribution of trash
+            
+            trash_sources: 
+                List of all TrashShource Objects that are generating currently trash. 
         """
         ret_history_visible_trash_grids, ret_history_agents, current_pos_agent = self.export_known_data()
-        return ret_history_visible_trash_grids, ret_history_agents, current_pos_agent , self.trash_grid_complete
+        return ret_history_visible_trash_grids, ret_history_agents, current_pos_agent , self.trash_grid_complete ,self.trash_sources
