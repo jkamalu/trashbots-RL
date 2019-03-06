@@ -2,3 +2,5 @@ jupyter
 numpy
 tensorflow
 keras
+aenum
+matplotlib
