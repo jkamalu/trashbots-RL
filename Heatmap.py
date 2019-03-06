@@ -37,10 +37,8 @@ class Heatmap:
         if num_steps > self.keep_track_of_steps:
             raise Exception("can't show map, too many steps")
 
-
         heat_map = self.get_heatmap(num_steps).astype(float)
-        sum_all_positions = sum(sum(heat_map))#sum over columns and rows
-        heat_map /= float(sum_all_positions)
+        heat_map /= float(num_steps)
 
         # Plot the heatmap
         fig, ax = plt.subplots()
@@ -49,6 +47,5 @@ class Heatmap:
             im.set_clim(0,1)
         # Create colorbar
         cbar = ax.figure.colorbar(im, ax=ax)
-        cbar.ax.set_ylabel("someone was here", rotation=-90, va="bottom")
         fig.tight_layout()
         plt.show()
