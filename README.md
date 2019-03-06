@@ -14,4 +14,7 @@ Implemented in Python 3.6 with dependencies listed in requirements.txt.
 
 For development with Jupyter notebooks: `.env/bin/jupyter-notebook`
 
+## Report
+
+https://docs.google.com/document/d/1GO4Yb-LC_mciKCMvDolRB-U3eUja1980ab8qthBPLGw/edit?usp=sharing
 
