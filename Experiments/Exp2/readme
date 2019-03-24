@@ -1,0 +1,7 @@
+This experiments tests how a model that was trained in one environment can adapt to a new environment. The main question is, whether this "pretrained" model can solve the new environment faster than a 'fresh' randomly initialized model. We compare the result from experiment one to a model that first mastered a different environment and is then put into the environment from experiment one. The learning graph for this second model can be seen in the figure.
+
+Unfortunately we observe that the pretrained model does not adapt faster to the new environment than the randomly initialized one. In fact we see that the pretrained model sticks in the beginning to the tiles where it was used to find trash in its original environment (tiles [2,2], [4,6], [8,5]). After 30000 steps the model more or less adapted to the new environment but is still less stable and only two trash sources were persistently exploited.
+
+
+
+_v2 pics are just the same experiment repeated. Either use the _v2 or the _v1 pics
