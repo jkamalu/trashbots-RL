@@ -8,11 +8,12 @@ class Heatmap:
 # input current positions
 
 
-    def __init__(self, keep_track_of_steps=200, style='Blues', fixed_color_scheme=False):
+    def __init__(self, keep_track_of_steps=200, style='Blues', fixed_color_scheme=False, title = "Heatmap"):
         self.maps = deque()
         self.keep_track_of_steps = keep_track_of_steps
         self.style = style
         self.fixed_color_scheme = fixed_color_scheme
+        self.title = title
 
     def add_map(self, map):
         self.maps.append(map)
@@ -28,7 +29,6 @@ class Heatmap:
 
         num_steps = min(len(self.maps),num_steps)
         sum_map = sum([self.maps[-(i+1)] for i in range(num_steps)])
-
         return sum_map
 
     def show_heatmap(self, num_steps=None):
@@ -48,4 +48,5 @@ class Heatmap:
         # Create colorbar
         cbar = ax.figure.colorbar(im, ax=ax)
         fig.tight_layout()
+        plt.title(self.title)
         plt.show()
